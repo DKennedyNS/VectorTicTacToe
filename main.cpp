@@ -137,6 +137,9 @@ class Board{
 class AI{
     set<int> movesMade;
 
+public:
+    AI() = default;
+
     void move(Board board, int turn, char AISymbol, char playerSymbol){
         switch(turn){
             case 0:
@@ -189,15 +192,103 @@ class AI{
                 if(movesMade.find(49) != movesMade.end() && movesMade.find(57) != movesMade.end()){
                     board.parseInput(53, AISymbol);
                     movesMade.insert(53); //end of game
-                }else if(movesMade.find(57) != movesMade.end() && movesMade.find(51) != movesMade.end()){
+                }else if(movesMade.find(57) != movesMade.end() && movesMade.find(51) != movesMade.end() &&
+                    board.getSymbol(1,2) != playerSymbol){
                     board.parseInput(54, AISymbol);
-                    movesMade.insert(53);//end of game
-                }else if(board.getSymbol(2,0) != playerSymbol && movesMade.find(55) == movesMade.end()){
+                    movesMade.insert(54);//end of game
+                }else if(board.getSymbol(2,0) != playerSymbol && movesMade.find(55) == movesMade.end())
+                {
                     board.parseInput(55, AISymbol);
                     movesMade.insert(55);
                 }
                 break;
-    }
+            case 5:
+                //This case will ony fire if the player went first
+                //Exhaustively check for a possible win, then just pick a spot
+                if(movesMade.find(57) != movesMade.end() && movesMade.find(55) != movesMade.end() &&
+                    board.getSymbol(2,1) != playerSymbol){
+                    board.parseInput(56, AISymbol);
+                    movesMade.insert(56);
+                }else if(movesMade.find(49) != movesMade.end() && movesMade.find(51) != movesMade.end() &&
+                    board.getSymbol(0,1) != playerSymbol){
+                    board.parseInput(50, AISymbol);
+                    movesMade.insert(50);
+                }else if(movesMade.find(57) != movesMade.end() && movesMade.find(51) != movesMade.end() &&
+                    board.getSymbol(1,2) != playerSymbol){
+                    board.parseInput(54, AISymbol);
+                    movesMade.insert(54);
+                }else if(movesMade.find(49) != movesMade.end() && movesMade.find(55) != movesMade.end() &&
+                    board.getSymbol(2,0) != playerSymbol){
+                    board.parseInput(55, AISymbol);
+                    movesMade.insert(55);
+                }else if(board.getSymbol(1,1) != playerSymbol && movesMade.find(53) == movesMade.end()){
+                    board.parseInput(53, AISymbol);
+                    movesMade.insert(53);
+                }else{
+                    //Try every possible spot on the board to see if it's free.
+                    for(int i=49; i<50; i++){
+                        if(board.parseInput(i, AISymbol)){
+                            break;
+                        }
+                    }
+                }
+                break;
+            case 6:
+                //This case will ony fire if the AI went first
+                //This case is exactly like case 5, only for the AI
+                //Exhaustively check for a possible win, then just pick a spot
+                if(movesMade.find(57) != movesMade.end() && movesMade.find(55) != movesMade.end() &&
+                   board.getSymbol(2,1) != playerSymbol){
+                    board.parseInput(56, AISymbol);
+                    movesMade.insert(56);
+                }else if(movesMade.find(49) != movesMade.end() && movesMade.find(51) != movesMade.end() &&
+                         board.getSymbol(0,1) != playerSymbol){
+                    board.parseInput(50, AISymbol);
+                    movesMade.insert(50);
+                }else if(movesMade.find(57) != movesMade.end() && movesMade.find(51) != movesMade.end() &&
+                         board.getSymbol(1,2) != playerSymbol){
+                    board.parseInput(54, AISymbol);
+                    movesMade.insert(54);
+                }else if(movesMade.find(49) != movesMade.end() && movesMade.find(55) != movesMade.end() &&
+                         board.getSymbol(2,0) != playerSymbol){
+                    board.parseInput(55, AISymbol);
+                    movesMade.insert(55);
+                }else if(board.getSymbol(1,1) != playerSymbol && movesMade.find(53) == movesMade.end()){
+                    board.parseInput(53, AISymbol);
+                    movesMade.insert(53);
+                }else{
+                    //Try every possible spot on the board to see if it's free.
+                    //This will be the move for all future cases
+                    for(int i=49; i<50; i++){
+                        if(board.parseInput(i, AISymbol)){
+                            break;
+                        }
+                    }
+                }
+                break;
+
+            case 7:
+                for(int i=49; i<50; i++){
+                    if(board.parseInput(i, AISymbol)){
+                        break;
+                    }
+                }
+                break;
+            case 8:
+                for(int i=49; i<50; i++){
+                    if(board.parseInput(i, AISymbol)){
+                        break;
+                    }
+                }
+                break;
+            case 9:
+                for(int i=49; i<50; i++){
+                    if(board.parseInput(i, AISymbol)){
+                        break;
+                    }
+                }
+                break;
+    }//end AI move
 };
 
 int main()
@@ -206,7 +297,7 @@ int main()
     string promptMove = "Please select a number from the board.";
     char playerSymbol;
     char AISymbol;
-    int move = 0;
+    int turn = 0;
     char playAgain = '0';
     char playerTurn = '0';
     int cell = 0;
@@ -225,6 +316,7 @@ int main()
     cout<<"Okay! Here we go, printing board..."<<endl<<endl;
     Board board;
     board.printBoard();
+    AI ai;
     //end intro
 
 
@@ -236,13 +328,13 @@ int main()
     }else{
         playerSymbol = 'O';
         AISymbol = 'X';
-        //AI.move(move);
+        ai.move(board, turn, AISymbol, playerSymbol);
     }//end turn selection
 
 
     //PRIMARY GAME LOOP
     //So long as no one has won, and there is still a move to be made, keep playing
-    while(!board.checkWin() && move < 9){
+    while(!board.checkWin() && turn < 9){
         //Make sure the cell is valid by turning the char into its ASCII code
         while(cell < 49 || cell > 57)
         {
@@ -258,8 +350,7 @@ int main()
             cell=(int)getchar();
         }
         cell = 0;
-        //Commented until implemented
-        //AI.turn();
+        ai.move(board, turn, AISymbol, playerSymbol);
     }//end game loop
 
     //GAME-END ROUTINE
@@ -284,7 +375,7 @@ int main()
         cout<<endl<<"That is not a valid entry."<<endl<<"Would you like to play again (y/n):"<<endl;
         playAgain = cin.get();
     }
-    //If the play wants to try again, destroy the board and call main()
+    //If the player wants to try again, destroy the board and call main()
     if(playAgain == 'y'){
         board.~Board();
         main();
