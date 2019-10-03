@@ -225,23 +225,24 @@ public:
                 //If not, get the top left if possible. Otherwise, go bottom left.
                 if (movesMade.find(57) != movesMade.end() && board.getSymbol(2, 0) != playerSymbol)
                 {
-                    position = 51;
-                    movesMade.insert(51);
+                    position = 55;
+                    movesMade.insert(55);
                 } else if (board.getSymbol(0, 0) != playerSymbol)
                 {
                     position = 49;
                     movesMade.insert(49);
                 } else
                 {
-                    position = 55;
-                    movesMade.insert(55);
+                    position = 51;
+                    movesMade.insert(51);
                 }
                 break;
             case 4:
                 //This case will only fire if the AI went first
                 //See if a win is possible, if so, win.
                 //If not, try to go bottom left
-                if (movesMade.find(49) != movesMade.end() && movesMade.find(57) != movesMade.end())
+                if (movesMade.find(49) != movesMade.end() && movesMade.find(57) != movesMade.end() &&
+                    board.getSymbol(1,1) != playerSymbol)
                 {
                     position = 53;
                     movesMade.insert(53); //end of game
