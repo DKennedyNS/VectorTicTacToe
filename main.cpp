@@ -75,7 +75,7 @@ class Board{
                 case 57:
                     row = 2; col = 2;
                     break;
-            }
+            }//end switch
             if(board[row][col] == 'X' || board[row][col] == 'O'){
                 //Cell already filled
                 return false;
@@ -83,7 +83,7 @@ class Board{
                 updateBoard(row,col, symbol);
                 return true;
             }
-        }
+        }//end parse input
 
     bool checkWin(){
 
@@ -113,15 +113,57 @@ class Board{
                 return true;
             }else{
                 return false;}
-    }
+    }//end check win
 
     char getWinner(){
         return winner;
         }
-
     char getSymbol(int row, int col){
         return board[row][col];
     }
+
+    bool isTaken(int cell){
+        //parseInput, but with no board update
+        int row;
+        int col;
+        switch(cell)
+        {
+            case 49:
+                row = 0; col = 0;
+                break;
+            case 50:
+                row = 0; col = 1;
+                break;
+            case 51:
+                row = 0; col = 2;
+                break;
+            case 52:
+                row = 1; col = 0;
+                break;
+            case 53:
+                row = 1; col = 1;
+                break;
+            case 54:
+                row = 1; col = 2;
+                break;
+            case 55:
+                row = 2; col = 0;
+                break;
+            case 56:
+                row = 2; col = 1;
+                break;
+            case 57:
+                row = 2; col = 2;
+                break;
+        }//end switch
+        if(board[row][col] == 'X' || board[row][col] == 'O'){
+            //Cell already filled
+            return true;
+        }else{
+            //cell not filled
+            return false;
+        }
+    }//end isTaken
 
     private:
         char winner;
@@ -132,7 +174,7 @@ class Board{
         }
 
 
-};
+};//end board class
 
 class AI{
     set<int> movesMade;
@@ -140,33 +182,40 @@ class AI{
 public:
     AI() = default;
 
-    void move(Board board, int turn, char AISymbol, char playerSymbol){
-        switch(turn){
+    int move(Board board, int turn, char AISymbol, char playerSymbol)
+    {
+        int position = 0;
+        switch (turn)
+        {
             case 0:
                 //On first turn, always choose bottom right
-                board.parseInput(57, AISymbol);
+                position = 57;
                 movesMade.insert(57);
                 break;
             case 1:
                 //This case will only fire if the player goes first
                 //On second turn, prefer the bottom right, but if that's taken, go bottom left.
-                if(board.getSymbol(2,2) != playerSymbol){
-                    board.parseInput(57, AISymbol);
+                if (board.getSymbol(2, 2) != playerSymbol)
+                {
+                    position = 57;
                     movesMade.insert(57);
-                }else{
+                } else
+                {
                     //Safe to assume if I get here the player chose bottom right
-                    board.parseInput(55, AISymbol);
+                    position = 55;
                     movesMade.insert(55);
                 }
                 break;
             case 2:
                 //This case will only fire if AI has gone first
                 //Try to get top left, otherwise go top right
-                if(board.getSymbol(0,0) != playerSymbol){
-                    board.parseInput(49, AISymbol);
+                if (board.getSymbol(0, 0) != playerSymbol)
+                {
+                    position = 49;
                     movesMade.insert(49);
-                }else{
-                    board.parseInput(51, AISymbol);
+                } else
+                {
+                    position = 51;
                     movesMade.insert(51);
                 }
                 break;
@@ -174,14 +223,17 @@ public:
                 //This case will only fire if the human went first
                 //If AI got the bottom right, get the top left if possible
                 //If not, get the top left if possible. Otherwise, go bottom left.
-                if(movesMade.find(57) != movesMade.end() && board.getSymbol(2,0) != playerSymbol){
-                    board.parseInput(51, AISymbol);
+                if (movesMade.find(57) != movesMade.end() && board.getSymbol(2, 0) != playerSymbol)
+                {
+                    position = 51;
                     movesMade.insert(51);
-                }else if(board.getSymbol(0,0) != playerSymbol){
-                    board.parseInput(49, AISymbol);
+                } else if (board.getSymbol(0, 0) != playerSymbol)
+                {
+                    position = 49;
                     movesMade.insert(49);
-                }else{
-                    board.parseInput(55, AISymbol);
+                } else
+                {
+                    position = 55;
                     movesMade.insert(55);
                 }
                 break;
@@ -189,45 +241,56 @@ public:
                 //This case will only fire if the AI went first
                 //See if a win is possible, if so, win.
                 //If not, try to go bottom left
-                if(movesMade.find(49) != movesMade.end() && movesMade.find(57) != movesMade.end()){
-                    board.parseInput(53, AISymbol);
-                    movesMade.insert(53); //end of game
-                }else if(movesMade.find(57) != movesMade.end() && movesMade.find(51) != movesMade.end() &&
-                    board.getSymbol(1,2) != playerSymbol){
-                    board.parseInput(54, AISymbol);
-                    movesMade.insert(54);//end of game
-                }else if(board.getSymbol(2,0) != playerSymbol && movesMade.find(55) == movesMade.end())
+                if (movesMade.find(49) != movesMade.end() && movesMade.find(57) != movesMade.end())
                 {
-                    board.parseInput(55, AISymbol);
+                    position = 53;
+                    movesMade.insert(53); //end of game
+                } else if (movesMade.find(57) != movesMade.end() && movesMade.find(51) != movesMade.end() &&
+                           board.getSymbol(1, 2) != playerSymbol)
+                {
+                    position = 54;
+                    movesMade.insert(54);//end of game
+                } else if (board.getSymbol(2, 0) != playerSymbol && movesMade.find(55) == movesMade.end())
+                {
+                    position = 54;
                     movesMade.insert(55);
                 }
                 break;
             case 5:
                 //This case will ony fire if the player went first
                 //Exhaustively check for a possible win, then just pick a spot
-                if(movesMade.find(57) != movesMade.end() && movesMade.find(55) != movesMade.end() &&
-                    board.getSymbol(2,1) != playerSymbol){
-                    board.parseInput(56, AISymbol);
+                if (movesMade.find(57) != movesMade.end() && movesMade.find(55) != movesMade.end() &&
+                    board.getSymbol(2, 1) != playerSymbol)
+                {
+                    position = 56;
                     movesMade.insert(56);
-                }else if(movesMade.find(49) != movesMade.end() && movesMade.find(51) != movesMade.end() &&
-                    board.getSymbol(0,1) != playerSymbol){
-                    board.parseInput(50, AISymbol);
+                } else if (movesMade.find(49) != movesMade.end() && movesMade.find(51) != movesMade.end() &&
+                           board.getSymbol(0, 1) != playerSymbol)
+                {
+                    position = 50;
                     movesMade.insert(50);
-                }else if(movesMade.find(57) != movesMade.end() && movesMade.find(51) != movesMade.end() &&
-                    board.getSymbol(1,2) != playerSymbol){
-                    board.parseInput(54, AISymbol);
+                } else if (movesMade.find(57) != movesMade.end() && movesMade.find(51) != movesMade.end() &&
+                           board.getSymbol(1, 2) != playerSymbol)
+                {
+                    position = 54;
                     movesMade.insert(54);
-                }else if(movesMade.find(49) != movesMade.end() && movesMade.find(55) != movesMade.end() &&
-                    board.getSymbol(2,0) != playerSymbol){
-                    board.parseInput(55, AISymbol);
+                } else if (movesMade.find(49) != movesMade.end() && movesMade.find(55) != movesMade.end() &&
+                           board.getSymbol(2, 0) != playerSymbol)
+                {
+                    position = 55;
                     movesMade.insert(55);
-                }else if(board.getSymbol(1,1) != playerSymbol && movesMade.find(53) == movesMade.end()){
-                    board.parseInput(53, AISymbol);
+                } else if (board.getSymbol(1, 1) != playerSymbol && movesMade.find(53) == movesMade.end())
+                {
+                    position = 53;
                     movesMade.insert(53);
-                }else{
+                } else
+                {
                     //Try every possible spot on the board to see if it's free.
-                    for(int i=49; i<50; i++){
-                        if(board.parseInput(i, AISymbol)){
+                    for (int i = 49; i < 50; i++)
+                    {
+                        if (!board.isTaken(i))
+                        {
+                            position = i;
                             break;
                         }
                     }
@@ -237,30 +300,39 @@ public:
                 //This case will ony fire if the AI went first
                 //This case is exactly like case 5, only for the AI
                 //Exhaustively check for a possible win, then just pick a spot
-                if(movesMade.find(57) != movesMade.end() && movesMade.find(55) != movesMade.end() &&
-                   board.getSymbol(2,1) != playerSymbol){
+                if (movesMade.find(57) != movesMade.end() && movesMade.find(55) != movesMade.end() &&
+                    board.getSymbol(2, 1) != playerSymbol)
+                {
                     board.parseInput(56, AISymbol);
                     movesMade.insert(56);
-                }else if(movesMade.find(49) != movesMade.end() && movesMade.find(51) != movesMade.end() &&
-                         board.getSymbol(0,1) != playerSymbol){
+                } else if (movesMade.find(49) != movesMade.end() && movesMade.find(51) != movesMade.end() &&
+                           board.getSymbol(0, 1) != playerSymbol)
+                {
                     board.parseInput(50, AISymbol);
                     movesMade.insert(50);
-                }else if(movesMade.find(57) != movesMade.end() && movesMade.find(51) != movesMade.end() &&
-                         board.getSymbol(1,2) != playerSymbol){
+                } else if (movesMade.find(57) != movesMade.end() && movesMade.find(51) != movesMade.end() &&
+                           board.getSymbol(1, 2) != playerSymbol)
+                {
                     board.parseInput(54, AISymbol);
                     movesMade.insert(54);
-                }else if(movesMade.find(49) != movesMade.end() && movesMade.find(55) != movesMade.end() &&
-                         board.getSymbol(2,0) != playerSymbol){
+                } else if (movesMade.find(49) != movesMade.end() && movesMade.find(55) != movesMade.end() &&
+                           board.getSymbol(2, 0) != playerSymbol)
+                {
                     board.parseInput(55, AISymbol);
                     movesMade.insert(55);
-                }else if(board.getSymbol(1,1) != playerSymbol && movesMade.find(53) == movesMade.end()){
+                } else if (board.getSymbol(1, 1) != playerSymbol && movesMade.find(53) == movesMade.end())
+                {
                     board.parseInput(53, AISymbol);
                     movesMade.insert(53);
-                }else{
+                } else
+                {
                     //Try every possible spot on the board to see if it's free.
                     //This will be the move for all future cases
-                    for(int i=49; i<50; i++){
-                        if(board.parseInput(i, AISymbol)){
+                    for (int i = 49; i < 50; i++)
+                    {
+                        if (!board.isTaken(i))
+                        {
+                            position = i;
                             break;
                         }
                     }
@@ -268,28 +340,39 @@ public:
                 break;
 
             case 7:
-                for(int i=49; i<50; i++){
-                    if(board.parseInput(i, AISymbol)){
+                for (int i = 49; i < 50; i++)
+                {
+                    if (!board.isTaken(i))
+                    {
+                        position = i;
                         break;
                     }
                 }
                 break;
             case 8:
-                for(int i=49; i<50; i++){
-                    if(board.parseInput(i, AISymbol)){
+                for (int i = 49; i < 50; i++)
+                {
+                    if (!board.isTaken(i))
+                    {
+                        position = i;
                         break;
                     }
                 }
                 break;
             case 9:
-                for(int i=49; i<50; i++){
-                    if(board.parseInput(i, AISymbol)){
+                for (int i = 49; i < 50; i++)
+                {
+                    if (!board.isTaken(i))
+                    {
+                        position = i;
                         break;
                     }
                 }
                 break;
+        }//end switch
+        return position;
     }//end AI move
-};
+};//end AI class
 
 int main()
 {
@@ -328,7 +411,7 @@ int main()
     }else{
         playerSymbol = 'O';
         AISymbol = 'X';
-        ai.move(board, turn, AISymbol, playerSymbol);
+        board.parseInput(ai.move(board, turn, AISymbol, playerSymbol), AISymbol);
     }//end turn selection
 
 
@@ -350,7 +433,10 @@ int main()
             cell=(int)getchar();
         }
         cell = 0;
-        ai.move(board, turn, AISymbol, playerSymbol);
+        turn++;
+        board.parseInput(ai.move(board, turn, AISymbol, playerSymbol), AISymbol);
+        turn++;
+        board.printBoard();
     }//end game loop
 
     //GAME-END ROUTINE
