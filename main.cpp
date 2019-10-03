@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <set> //No idea why I needed to include this since I'm using namespace std...
 
 using namespace std;
 class Board{
@@ -47,31 +48,31 @@ class Board{
             int col;
             switch(cell)
             {
-                case 1:
+                case 49:
                     row = 0; col = 0;
                     break;
-                case 2:
+                case 50:
                     row = 0; col = 1;
                     break;
-                case 3:
+                case 51:
                     row = 0; col = 2;
                     break;
-                case 4:
+                case 52:
                     row = 1; col = 0;
                     break;
-                case 5:
+                case 53:
                     row = 1; col = 1;
                     break;
-                case 6:
+                case 54:
                     row = 1; col = 2;
                     break;
-                case 7:
+                case 55:
                     row = 2; col = 0;
                     break;
-                case 8:
+                case 56:
                     row = 2; col = 1;
                     break;
-                case 9:
+                case 57:
                     row = 2; col = 2;
                     break;
             }
@@ -118,6 +119,10 @@ class Board{
         return winner;
         }
 
+    char getSymbol(int row, int col){
+        return board[row][col];
+    }
+
     private:
         char winner;
         void updateBoard(int row, int col, char player){
@@ -130,7 +135,69 @@ class Board{
 };
 
 class AI{
-    //AI implementation
+    set<int> movesMade;
+
+    void move(Board board, int turn, char AISymbol, char playerSymbol){
+        switch(turn){
+            case 0:
+                //On first turn, always choose bottom right
+                board.parseInput(57, AISymbol);
+                movesMade.insert(57);
+                break;
+            case 1:
+                //This case will only fire if the player goes first
+                //On second turn, prefer the bottom right, but if that's taken, go bottom left.
+                if(board.getSymbol(2,2) != playerSymbol){
+                    board.parseInput(57, AISymbol);
+                    movesMade.insert(57);
+                }else{
+                    //Safe to assume if I get here the player chose bottom right
+                    board.parseInput(55, AISymbol);
+                    movesMade.insert(55);
+                }
+                break;
+            case 2:
+                //This case will only fire if AI has gone first
+                //Try to get top left, otherwise go top right
+                if(board.getSymbol(0,0) != playerSymbol){
+                    board.parseInput(49, AISymbol);
+                    movesMade.insert(49);
+                }else{
+                    board.parseInput(51, AISymbol);
+                    movesMade.insert(51);
+                }
+                break;
+            case 3:
+                //This case will only fire if the human went first
+                //If AI got the bottom right, get the top left if possible
+                //If not, get the top left if possible. Otherwise, go bottom left.
+                if(movesMade.find(57) != movesMade.end() && board.getSymbol(2,0) != playerSymbol){
+                    board.parseInput(51, AISymbol);
+                    movesMade.insert(51);
+                }else if(board.getSymbol(0,0) != playerSymbol){
+                    board.parseInput(49, AISymbol);
+                    movesMade.insert(49);
+                }else{
+                    board.parseInput(55, AISymbol);
+                    movesMade.insert(55);
+                }
+                break;
+            case 4:
+                //This case will only fire if the AI went first
+                //See if a win is possible, if so, win.
+                //If not, try to go bottom left
+                if(movesMade.find(49) != movesMade.end() && movesMade.find(57) != movesMade.end()){
+                    board.parseInput(53, AISymbol);
+                    movesMade.insert(53); //end of game
+                }else if(movesMade.find(57) != movesMade.end() && movesMade.find(51) != movesMade.end()){
+                    board.parseInput(54, AISymbol);
+                    movesMade.insert(53);//end of game
+                }else if(board.getSymbol(2,0) != playerSymbol && movesMade.find(55) == movesMade.end()){
+                    board.parseInput(55, AISymbol);
+                    movesMade.insert(55);
+                }
+                break;
+    }
 };
 
 int main()
@@ -142,6 +209,7 @@ int main()
     int move = 0;
     char playAgain = '0';
     char playerTurn = '0';
+    int cell = 0;
 
     //INTRO PRINTS
     //See if the player wants to go first or second.
@@ -175,20 +243,21 @@ int main()
     //PRIMARY GAME LOOP
     //So long as no one has won, and there is still a move to be made, keep playing
     while(!board.checkWin() && move < 9){
-        cout<<promptMove<<endl;
-        int cell;
-        cell = (int)cin.get();
-        //Make sure the cell is valid
-        while(cell < 1 || cell > 9)
+        //Make sure the cell is valid by turning the char into its ASCII code
+        while(cell < 49 || cell > 57)
         {
-            cout<<"That is not a valid cell."<<endl<<promptMove;
-            cell=(int)cin.get();
+            cout<<endl<<promptMove<<endl;
+            cell=(int)getchar();
+            if(cell<49 || cell >57){
+                cout<<"That is not a valid cell"<<endl;
+            }
         }
         //Ask the board if the cell is filled
         while(!board.parseInput(cell, playerSymbol)){
-            cout<<"That is not a valid cell."<<endl<<promptMove;
-            cell=(int)cin.get();
+            cout<<"That is not a valid cell."<<endl<<promptMove<<endl;
+            cell=(int)getchar();
         }
+        cell = 0;
         //Commented until implemented
         //AI.turn();
     }//end game loop
