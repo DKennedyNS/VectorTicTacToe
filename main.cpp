@@ -253,7 +253,7 @@ public:
                     movesMade.insert(54);//end of game
                 } else if (board.getSymbol(2, 0) != playerSymbol && movesMade.find(55) == movesMade.end())
                 {
-                    position = 54;
+                    position = 55;
                     movesMade.insert(55);
                 }
                 break;
@@ -379,12 +379,13 @@ int main()
 {
     //VARIABLE DECLARATION
     string promptMove = "Please select a number from the board.";
-    char playerSymbol;
-    char AISymbol;
-    int turn = 0;
-    char playAgain = '0';
-    char playerTurn = '0';
-    int cell = 0;
+    char playerSymbol; //holds which symbol the human uses
+    char AISymbol; //holds which symbol the AI uses
+    int turn = 0; //tracks which turn it is for AI decision making
+    char playAgain = '0'; //takes input to see if the player wants to try again
+    char playerTurn = '0'; //takes input to see if the player wants to go first
+    int cell = 0; //holds which cell the player chooses for their move
+    char input; //temporary input holder to enable int cast
 
     //INTRO PRINTS
     //See if the player wants to go first or second.
@@ -423,15 +424,18 @@ int main()
         while(cell < 49 || cell > 57)
         {
             cout<<endl<<promptMove<<endl;
-            cell=(int)getchar();
-            if(cell<49 || cell >57){
-                cout<<"That is not a valid cell"<<endl;
+            cin >> input;
+            cell = (int)input;
+            if(cell <49 || cell > 57){
+                cout<<"That is not a valid cell."<<endl;
             }
         }
         //Ask the board if the cell is filled
         while(!board.parseInput(cell, playerSymbol)){
             cout<<"That is not a valid cell."<<endl<<promptMove<<endl;
             cell=(int)getchar();
+            cin >> input;
+            cell = (int)input;
         }
         cell = 0;
         turn++;
@@ -457,10 +461,10 @@ int main()
     }
     //See if the player wants to go again
     cout<<"Would you like to play again (y/n): "<<endl;
-    playAgain = cin.get();
+    cin >> playAgain;
     while(playAgain != 'y' && playAgain != 'n'){
         cout<<endl<<"That is not a valid entry."<<endl<<"Would you like to play again (y/n):"<<endl;
-        playAgain = cin.get();
+        cin >> playAgain;
     }
     //If the player wants to try again, destroy the board and call main()
     if(playAgain == 'y'){
