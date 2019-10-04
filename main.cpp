@@ -202,10 +202,10 @@ public:
                 }
             }
             if(count >= 2){
-                block = true;
                 for(int k=0; k<3; k++){
-                    if(board.getSymbol(i, k) != playerSymbol){
+                    if(board.getSymbol(i, k) != playerSymbol && board.getSymbol(i, k) != AISymbol){
                         position = board.getSymbol(i, k);
+                        block = true;
                     }
                 }
             }
@@ -220,10 +220,10 @@ public:
                 }
             }
             if(count >= 2){
-                block = true;
                 for(int k=0; k<3; k++){
-                    if(board.getSymbol(k, i) != playerSymbol){
+                    if(board.getSymbol(k, i) != playerSymbol && board.getSymbol(k, i) != AISymbol){
                         position = board.getSymbol(k, i);
+                        block = true;
                     }
                 }
             }
@@ -268,14 +268,18 @@ public:
                 break;
             case 1:
                 //This case will only fire if the player goes first
-                //On second turn, prefer the bottom right, but if that's taken, go bottom left.
-                if (board.getSymbol(2, 2) != playerSymbol)
+                //On second turn, if the player took anything other than the middle, take the middle.
+                if(board.getSymbol(1,1) != playerSymbol){
+                    position = 53;
+                    movesMade.insert(53);
+                }
+                else if (board.getSymbol(2, 2) != playerSymbol)
                 {
                     position = 57;
                     movesMade.insert(57);
                 } else
                 {
-                    //Safe to assume if I get here the player chose bottom right
+
                     position = 55;
                     movesMade.insert(55);
                 }
@@ -300,6 +304,7 @@ public:
                 if (block)
                 {
                     movesMade.insert(position);
+                    block = false;
                 } else if (movesMade.find(57) != movesMade.end() && board.getSymbol(2, 0) != playerSymbol)
                 {
                     position = 55;
@@ -321,6 +326,7 @@ public:
                 if (block)
                 {
                     movesMade.insert(position);
+                    block = false;
                 } else if (movesMade.find(49) != movesMade.end() && movesMade.find(57) != movesMade.end() &&
                            board.getSymbol(1, 1) != playerSymbol)
                 {
@@ -343,6 +349,7 @@ public:
                 if (block)
                 {
                     movesMade.insert(position);
+                    block = false;
                 } else if (movesMade.find(57) != movesMade.end() && movesMade.find(55) != movesMade.end() &&
                            board.getSymbol(2, 1) != playerSymbol)
                 {
@@ -370,12 +377,11 @@ public:
                 } else
                 {
                     //Try every possible spot on the board to see if it's free.
-                    for (int i = 49; i < 50; i++)
+                    for (int i = 49; i < 57; i++)
                     {
                         if (!board.isTaken(i))
                         {
                             position = i;
-                            break;
                         }
                     }
                 }
@@ -387,6 +393,7 @@ public:
                 if (block)
                 {
                     movesMade.insert(position);
+                    block = false;
                 } else if (movesMade.find(57) != movesMade.end() && movesMade.find(55) != movesMade.end() &&
                            board.getSymbol(2, 1) != playerSymbol)
                 {
@@ -415,54 +422,57 @@ public:
                 {
                     //Try every possible spot on the board to see if it's free.
                     //This will be the move for all future cases
-                    for (int i = 49; i < 50; i++)
+                    for (int i = 49; i < 57; i++)
                     {
                         if (!board.isTaken(i))
                         {
                             position = i;
-                            break;
                         }
                     }
                 }
+                break;
             case 7:
                 if (block){
                     movesMade.insert(position);
+                    block = false;
                 }else{
-                    for (int i = 49; i < 50; i++)
+                    for (int i = 49; i < 57; i++)
                     {
                         if (!board.isTaken(i))
                         {
                             position = i;
-                            break;
                         }
                     }
                 }
+                break;
             case 8:
                 if (block){
                     movesMade.insert(position);
+                    block = false;
                 }else{
-                    for (int i = 49; i < 50; i++)
+                    for (int i = 49; i < 57; i++)
                     {
                         if (!board.isTaken(i))
                         {
                             position = i;
-                            break;
                         }
                     }
                 }
+                break;
             case 9:
                 if (block){
                     movesMade.insert(position);
+                    block = false;
                 }else{
-                    for (int i = 49; i < 50; i++)
+                    for (int i = 49; i < 57; i++)
                     {
                         if (!board.isTaken(i))
                         {
                             position = i;
-                            break;
                         }
                     }
                 }
+                break;
         }//end switch
         return position;
     }//end AI move
@@ -483,11 +493,11 @@ int main()
     //INTRO PRINTS
     //See if the player wants to go first or second.
     cout << "Welcome to Tic Tac Toe!"<<endl<<"Would you like to go first or second (1 or 2): "<<endl;
-    playerTurn = cin.get();
+    cin >> playerTurn;
 
     //Make sure the player doesn't enter something stupid.
     while(playerTurn != '1' && playerTurn != '2'){
-        playerTurn = cin.get();
+        cin >> playerTurn;
         cout<<"That is not a valid selection."<<endl<<"Please enter either 1 or 2:"<<endl;
     }
     //Init the board
@@ -512,7 +522,7 @@ int main()
 
     //PRIMARY GAME LOOP
     //So long as no one has won, and there is still a move to be made, keep playing
-    while(!board.checkWin() || turn < 9){
+    while(!board.checkWin() || turn < 8){
         //Make sure the cell is valid by turning the char into its ASCII code
         while(cell < 49 || cell > 57)
         {
@@ -530,12 +540,15 @@ int main()
             cin >> input;
             cell = (int)input;
         }
-        if(board.checkWin()){
+        if(board.checkWin() ||  turn >= 8){
             break;
         }
         cell = 0;
         turn++;
         board.parseInput(ai.move(board, turn, AISymbol, playerSymbol), AISymbol);
+        if(board.checkWin() || turn >= 8){
+            break;
+        }
         turn++;
         board.printBoard();
     }//end game loop
@@ -566,6 +579,8 @@ int main()
     if(playAgain == 'y'){
         board.~Board();
         main();
+    }else{
+        cout << endl << "Thanks for playing!" << endl;
     }
     //end game-end routine
     return 0;
