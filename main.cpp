@@ -5,8 +5,8 @@
 using namespace std;
 class Board{
     public:
-        vector<vector<char> > board;
-        vector<char> row1;
+        vector<vector<char> > board; //2d Vector to hold the game board
+        vector<char> row1; //Rows to initialize the 2d vector
         vector<char> row2;
         vector<char> row3;
 
@@ -43,47 +43,49 @@ class Board{
         }
 
     bool parseInput(int cell, char symbol){
+        //Check to see if the input cell is valid
 
-            int row;
-            int col;
-            switch(cell)
-            {
-                case 49:
-                    row = 0; col = 0;
-                    break;
-                case 50:
-                    row = 0; col = 1;
-                    break;
-                case 51:
-                    row = 0; col = 2;
-                    break;
-                case 52:
-                    row = 1; col = 0;
-                    break;
-                case 53:
-                    row = 1; col = 1;
-                    break;
-                case 54:
-                    row = 1; col = 2;
-                    break;
-                case 55:
-                    row = 2; col = 0;
-                    break;
-                case 56:
-                    row = 2; col = 1;
-                    break;
-                case 57:
-                    row = 2; col = 2;
-                    break;
-            }//end switch
-            if(board[row][col] == 'X' || board[row][col] == 'O'){
-                //Cell already filled
-                return false;
-            }else{
-                updateBoard(row,col, symbol);
-                return true;
-            }
-        }//end parse input
+        int row;
+        int col;
+        switch(cell)
+        {
+            //Change ASCII value into row/col
+            case 49:
+                row = 0; col = 0;
+                break;
+            case 50:
+                row = 0; col = 1;
+                break;
+            case 51:
+                row = 0; col = 2;
+                break;
+            case 52:
+                row = 1; col = 0;
+                break;
+            case 53:
+                row = 1; col = 1;
+                break;
+            case 54:
+                row = 1; col = 2;
+                break;
+            case 55:
+                row = 2; col = 0;
+                break;
+            case 56:
+                row = 2; col = 1;
+                break;
+            case 57:
+                row = 2; col = 2;
+                break;
+        }//end switch
+        if(board[row][col] == 'X' || board[row][col] == 'O'){
+            //Cell already filled
+            return false;
+        }else{
+            updateBoard(row,col, symbol);
+            return true;
+        }
+    }//end parse input
 
     bool checkWin(){
         //Check all possible win conditions
@@ -120,11 +122,13 @@ class Board{
         return winner;
         }
     char getSymbol(int row, int col){
+        //getter to return a cell value
         return board[row][col];
     }
 
     bool isTaken(int cell){
         //parseInput, but with no board update
+        //returns true if the cell is occupied by a player
         int row;
         int col;
         switch(cell)
@@ -167,7 +171,7 @@ class Board{
     }//end isTaken
 
     private:
-        char winner;
+        char winner; //private var to hold winning player symbol for return
         void updateBoard(int row, int col, char player){
             //Update the value at a specific index
             board.at(row).at(col) = player;
@@ -178,18 +182,20 @@ class Board{
 };//end board class
 
 class AI{
-    set<int> movesMade;
+    set<int> movesMade; //A vector of moves made by the AI
 
 public:
     AI() = default;
 
     int move(Board board, int turn, char AISymbol, char playerSymbol)
     {
+        //Logic to hold all moves made by the AI
         int position = 0;
         bool block = false;
         int diagonal1[3] = {49, 53, 57};
         int diagonal2[3] = {51, 53, 55};
 
+        //BLOCKING SCRIPT
         //Use a for loop to see if any row or col has two human moves in it, if so, set block true.
         //Then iterate through the offending row/col to find the open cell. Set position to the open cell.
 
@@ -229,7 +235,7 @@ public:
             }
         }
 
-        //Iterate through the diagonals and check if they are taken, then check if they are taken by me. If not, count++
+        //Diagonals
         for(int i=0; i<3; i++){
             int count = 0;
             if(board.isTaken(diagonal1[i]) && movesMade.find(diagonal1[i]) == movesMade.end()){
@@ -255,10 +261,9 @@ public:
                 }
             }
         }
+        //end blocking script
 
-
-
-
+        //TURN BY TURN SCRIPT
         switch (turn)
         {
             case 0:
@@ -279,7 +284,7 @@ public:
                     movesMade.insert(57);
                 } else
                 {
-
+                    //AI should never get here.
                     position = 55;
                     movesMade.insert(55);
                 }
@@ -299,6 +304,7 @@ public:
                 break;
             case 3:
                 //This case will only fire if the human went first
+                //From this point on, always look for a block first.
                 //If AI got the bottom right, get the top left if possible
                 //If not, get the top left if possible. Otherwise, go bottom left.
                 if (block)
@@ -331,12 +337,12 @@ public:
                            board.getSymbol(1, 1) != playerSymbol)
                 {
                     position = 53;
-                    movesMade.insert(53); //end of game
+                    movesMade.insert(53);
                 } else if (movesMade.find(57) != movesMade.end() && movesMade.find(51) != movesMade.end() &&
                            board.getSymbol(1, 2) != playerSymbol)
                 {
                     position = 54;
-                    movesMade.insert(54);//end of game
+                    movesMade.insert(54);
                 } else if (board.getSymbol(2, 0) != playerSymbol && movesMade.find(55) == movesMade.end())
                 {
                     position = 55;
@@ -473,7 +479,7 @@ public:
                     }
                 }
                 break;
-        }//end switch
+        }//end turn by turn switch
         return position;
     }//end AI move
 };//end AI class
@@ -540,12 +546,14 @@ int main()
             cin >> input;
             cell = (int)input;
         }
+        //Human turn done. Check to see if the game is over
         if(board.checkWin() ||  turn >= 8){
             break;
         }
         cell = 0;
         turn++;
         board.parseInput(ai.move(board, turn, AISymbol, playerSymbol), AISymbol);
+        //AI turn done. Check to see if the game is over
         if(board.checkWin() || turn >= 8){
             break;
         }
