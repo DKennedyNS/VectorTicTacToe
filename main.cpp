@@ -419,7 +419,7 @@ int main()
 
     //PRIMARY GAME LOOP
     //So long as no one has won, and there is still a move to be made, keep playing
-    while(!board.checkWin() && turn < 9){
+    while(!board.checkWin() || turn < 9){
         //Make sure the cell is valid by turning the char into its ASCII code
         while(cell < 49 || cell > 57)
         {
@@ -436,6 +436,9 @@ int main()
             cell=(int)getchar();
             cin >> input;
             cell = (int)input;
+        }
+        if(board.checkWin()){
+            break;
         }
         cell = 0;
         turn++;
