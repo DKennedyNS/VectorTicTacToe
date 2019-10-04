@@ -186,6 +186,79 @@ public:
     int move(Board board, int turn, char AISymbol, char playerSymbol)
     {
         int position = 0;
+        bool block = false;
+        int diagonal1[3] = {49, 53, 57};
+        int diagonal2[3] = {51, 53, 55};
+
+        //Use a for loop to see if any row or col has two human moves in it, if so, set block true.
+        //Then iterate through the offending row/col to find the open cell. Set position to the open cell.
+
+        //Rows
+        for(int i=0; i<3; i++){
+            int count = 0;
+            for(int j=0; j<3; j++){
+                if(board.getSymbol(i,j) == playerSymbol){
+                    count++;
+                }
+            }
+            if(count >= 2){
+                block = true;
+                for(int k=0; k<3; k++){
+                    if(board.getSymbol(i, k) != playerSymbol){
+                        position = board.getSymbol(i, k);
+                    }
+                }
+            }
+        }
+
+        //Columns
+        for(int i=0; i<3; i++){
+            int count = 0;
+            for(int j=0; j<3; j++){
+                if(board.getSymbol(j, i) == playerSymbol){
+                    count++;
+                }
+            }
+            if(count >= 2){
+                block = true;
+                for(int k=0; k<3; k++){
+                    if(board.getSymbol(k, i) != playerSymbol){
+                        position = board.getSymbol(k, i);
+                    }
+                }
+            }
+        }
+
+        //Iterate through the diagonals and check if they are taken, then check if they are taken by me. If not, count++
+        for(int i=0; i<3; i++){
+            int count = 0;
+            if(board.isTaken(diagonal1[i]) && movesMade.find(diagonal1[i]) == movesMade.end()){
+                count++;
+            }
+            if(count>=2){
+                for(int j=0; j<3; j++){
+                    if(!board.isTaken(diagonal1[j]) && movesMade.find(diagonal1[j]) ==movesMade.end())
+                        position = diagonal1[j];
+                }
+            }
+        }
+
+        for(int i=0; i<3; i++){
+            int count = 0;
+            if(board.isTaken(diagonal2[i]) && movesMade.find(diagonal2[i]) == movesMade.end()){
+                count++;
+            }
+            if(count>=2){
+                for(int j=0; j<3; j++){
+                    if(!board.isTaken(diagonal2[j]) && movesMade.find(diagonal2[j]) ==movesMade.end())
+                        position = diagonal2[j];
+                }
+            }
+        }
+
+
+
+
         switch (turn)
         {
             case 0:
@@ -224,7 +297,10 @@ public:
                 //This case will only fire if the human went first
                 //If AI got the bottom right, get the top left if possible
                 //If not, get the top left if possible. Otherwise, go bottom left.
-                if (movesMade.find(57) != movesMade.end() && board.getSymbol(2, 0) != playerSymbol)
+                if (block)
+                {
+                    movesMade.insert(position);
+                } else if (movesMade.find(57) != movesMade.end() && board.getSymbol(2, 0) != playerSymbol)
                 {
                     position = 55;
                     movesMade.insert(55);
@@ -242,8 +318,11 @@ public:
                 //This case will only fire if the AI went first
                 //See if a win is possible, if so, win.
                 //If not, try to go bottom left
-                if (movesMade.find(49) != movesMade.end() && movesMade.find(57) != movesMade.end() &&
-                    board.getSymbol(1,1) != playerSymbol)
+                if (block)
+                {
+                    movesMade.insert(position);
+                } else if (movesMade.find(49) != movesMade.end() && movesMade.find(57) != movesMade.end() &&
+                           board.getSymbol(1, 1) != playerSymbol)
                 {
                     position = 53;
                     movesMade.insert(53); //end of game
@@ -261,8 +340,11 @@ public:
             case 5:
                 //This case will ony fire if the player went first
                 //Exhaustively check for a possible win, then just pick a spot
-                if (movesMade.find(57) != movesMade.end() && movesMade.find(55) != movesMade.end() &&
-                    board.getSymbol(2, 1) != playerSymbol)
+                if (block)
+                {
+                    movesMade.insert(position);
+                } else if (movesMade.find(57) != movesMade.end() && movesMade.find(55) != movesMade.end() &&
+                           board.getSymbol(2, 1) != playerSymbol)
                 {
                     position = 56;
                     movesMade.insert(56);
@@ -302,8 +384,11 @@ public:
                 //This case will ony fire if the AI went first
                 //This case is exactly like case 5, only for the AI
                 //Exhaustively check for a possible win, then just pick a spot
-                if (movesMade.find(57) != movesMade.end() && movesMade.find(55) != movesMade.end() &&
-                    board.getSymbol(2, 1) != playerSymbol)
+                if (block)
+                {
+                    movesMade.insert(position);
+                } else if (movesMade.find(57) != movesMade.end() && movesMade.find(55) != movesMade.end() &&
+                           board.getSymbol(2, 1) != playerSymbol)
                 {
                     board.parseInput(56, AISymbol);
                     movesMade.insert(56);
@@ -339,38 +424,45 @@ public:
                         }
                     }
                 }
-                break;
-
             case 7:
-                for (int i = 49; i < 50; i++)
-                {
-                    if (!board.isTaken(i))
+                if (block){
+                    movesMade.insert(position);
+                }else{
+                    for (int i = 49; i < 50; i++)
                     {
-                        position = i;
-                        break;
+                        if (!board.isTaken(i))
+                        {
+                            position = i;
+                            break;
+                        }
                     }
                 }
-                break;
             case 8:
-                for (int i = 49; i < 50; i++)
-                {
-                    if (!board.isTaken(i))
+                if (block){
+                    movesMade.insert(position);
+                }else{
+                    for (int i = 49; i < 50; i++)
                     {
-                        position = i;
-                        break;
+                        if (!board.isTaken(i))
+                        {
+                            position = i;
+                            break;
+                        }
                     }
                 }
-                break;
             case 9:
-                for (int i = 49; i < 50; i++)
-                {
-                    if (!board.isTaken(i))
+                if (block){
+                    movesMade.insert(position);
+                }else{
+                    for (int i = 49; i < 50; i++)
                     {
-                        position = i;
-                        break;
+                        if (!board.isTaken(i))
+                        {
+                            position = i;
+                            break;
+                        }
                     }
                 }
-                break;
         }//end switch
         return position;
     }//end AI move
